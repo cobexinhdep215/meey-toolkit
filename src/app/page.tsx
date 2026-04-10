@@ -25,9 +25,9 @@ export default function Home() {
   const [progress, setProgress] = useState(0);
   const [loadingText, setLoadingText] = useState("Đang thu thập dữ kiện...");
 
-  // Detail Modal State
   const [isDetailOpen, setIsDetailOpen] = useState(false);
   const [activeDetail, setActiveDetail] = useState<any>(null);
+  const [isRewriting, setIsRewriting] = useState(false);
 
   const editorRef = useRef<HTMLDivElement>(null);
 
@@ -41,6 +41,20 @@ export default function Home() {
   };
 
   const closeModal = () => setIsModalOpen(false);
+
+  const handleRewriteAi = () => {
+    const requirement = prompt("Hãy mô tả yêu cầu muốn gọt giũa cho AI (VD: Làm văn phong ngặt nghèo hơn, giảm giá tiền...):");
+    if (requirement) {
+      setIsRewriting(true);
+      setTimeout(() => {
+        if (editorRef.current) {
+          const currentHtml = editorRef.current.innerHTML;
+          editorRef.current.innerHTML = currentHtml + `<br/><div style="padding:15px;background:#f0f9ff;border-left:4px solid #4318ff;color:#1e3a8a;margin-top:10px"><b>✨ [AI Đã phân tích và biên tập thêm]:</b> Căn cứ theo yêu cầu đệ trình "${requirement}", các bên cam kết tuân thủ tuyệt đối các quy định bổ sung và chịu trách nhiệm trước pháp luật...</div>`;
+        }
+        setIsRewriting(false);
+      }, 2500);
+    }
+  };
 
   const handleAutoFill = () => {
     const config = formConfigs[activeTemplate] || [];
@@ -299,8 +313,14 @@ export default function Home() {
               )}
 
               {step === 2 && (
-                <div className="step-content p-8 md:p-10 flex-1 flex flex-col animate-fadeIn">
-                  <div className="editor-container flex flex-col border border-gray-200 rounded-xl shadow-sm flex-1 mb-6 bg-white overflow-hidden">
+                <div className="step-content p-8 md:p-10 flex-1 flex flex-col animate-fadeIn relative">
+                  {isRewriting && (
+                    <div className="absolute inset-0 bg-white/70 backdrop-blur-sm z-20 flex flex-col items-center justify-center rounded-xl">
+                      <i className="ph ph-spinner-gap text-5xl text-[#4318ff] animate-spin mb-4"></i>
+                      <p className="font-bold text-lg text-[#0b1437]">AI đang đọc và biên tập lại văn bản...</p>
+                    </div>
+                  )}
+                  <div className="editor-container flex flex-col border border-gray-200 rounded-xl shadow-sm flex-1 mb-6 bg-white overflow-hidden relative z-10">
                     <div
                       ref={editorRef}
                       className="p-8 md:p-12 overflow-y-auto flex-1 outline-none text-[#1a202c] leading-loose text-base tracking-wide custom-scrollbar focus:ring-2 focus:ring-inset focus:ring-[#4318ff]/20 transition-all cursor-text"
@@ -310,11 +330,11 @@ export default function Home() {
                     ></div>
                   </div>
 
-                  <div className="flex flex-col md:flex-row justify-between items-center gap-4 mt-auto">
-                    <p className="text-sm text-gray-500 italic"><i className="ph ph-note-pencil text-lg mr-1 text-[#4318ff]"></i> Bạn có thể click trực tiếp vào văn bản phía trên để tự do chỉnh sửa trước khi lưu.</p>
+                  <div className="flex flex-col md:flex-row justify-between items-center gap-4 mt-auto relative z-10 w-full">
+                    <button onClick={handleRewriteAi} className="px-6 py-3 rounded-lg font-bold text-white bg-gradient-to-r from-[#4318ff] to-[#ff6b00] hover:shadow-lg hover:-translate-y-0.5 transition-all flex items-center gap-2"><i className="ph ph-magic-wand text-xl"></i> Biên tập lại (AI)</button>
                     <div className="flex gap-4">
                       <button onClick={() => setStep(0)} className="px-6 py-3 rounded-lg font-semibold text-[#707eae] bg-gray-50 hover:bg-gray-100 transition-colors flex items-center gap-2">Làm lại Form</button>
-                      <button onClick={handleSave} className="px-8 py-3 rounded-lg font-semibold text-white bg-[#4318ff] hover:bg-[#3311db] transition-colors shadow-md flex items-center gap-2"><i className="ph ph-floppy-disk"></i> Lưu kết quả chỉnh sửa</button>
+                      <button onClick={handleSave} className="px-8 py-3 rounded-lg font-semibold text-white bg-[#4318ff] hover:bg-[#3311db] transition-colors shadow-md flex items-center gap-2"><i className="ph ph-floppy-disk"></i> Lưu kết quả</button>
                     </div>
                   </div>
                 </div>

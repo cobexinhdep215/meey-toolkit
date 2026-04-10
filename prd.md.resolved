@@ -1,0 +1,37 @@
+# Tài liệu Phân tích Nghiệp vụ (PRD) - Meey Toolkit
+
+## 1. Tổng quan
+**Meey Toolkit** là bộ công cụ tích hợp trong hệ sinh thái Meey (Meey Land, Meey Map...), trang bị sức mạnh của AI giúp người dùng (môi giới, chính chủ, khách hàng) tự động hóa và tạo nhanh các biểu mẫu, tài liệu chuyên nghiệp phục vụ giao dịch bất động sản.
+
+## 2. Đối tượng sử dụng (User Personas)
+* **Môi giới BĐS (Broker):** Cần tạo nhanh hợp đồng đặt cọc, thư chào hàng, tin đăng chuẩn SEO, tiết kiệm thời gian gõ lặp đi lặp lại.
+* **Chủ nhà (Chính chủ):** Cần mẫu hợp đồng cho thuê, biên nhận cọc minh bạch, có giá trị pháp lý cơ bản để tự giao dịch.
+* **Khách thuê/Người mua:** Cần mẫu biên bản bàn giao nhà, tin nhắn thương lượng giá chuyên nghiệp.
+
+## 3. User Stories (Giai đoạn 1 - MVP)
+* **US01 (Chọn biểu mẫu):** Là người dùng, tôi muốn xem danh sách các loại biểu mẫu được hỗ trợ để chọn tài liệu phù hợp (Ví dụ: Hợp đồng thuê, Đặt cọc, Mẫu đăng tin).
+* **US02 (Nhập dữ liệu đầu vào):** Là người dùng, tôi muốn nhập thông tin cơ bản qua một form động (Dynamic Form) để cung cấp dữ kiện cho AI một cách dễ dàng và không bị sót thông tin.
+* **US03 (AI sinh nội dung):** Là hệ thống, AI sẽ tiếp nhận dữ liệu từ form và sinh ra văn bản hoàn chỉnh dựa trên các prompt chuẩn hóa của nền tảng.
+* **US04 (Xem trước & Chỉnh sửa):** Là người dùng, tôi muốn được xem trước biểu mẫu trên trình soạn thảo (Rich Text Editor) để bổ sung/chỉnh sửa câu chữ thủ công nếu cần.
+* **US05 (Thu thập & Chia sẻ):** Là người dùng, tôi muốn tải xuống tài liệu dưới dạng PDF/Word hoặc sao chép nhanh (Copy to clipboard) để gửi qua Zalo, Email cho đối tác.
+
+## 4. Giao diện & Luồng màn hình (Screen Flow)
+1. **Trang chủ Toolkit:** Grid/List hiển thị các Card biểu mẫu (Hợp đồng thuê, Cọc, Tin đăng, Tin nhắn...).
+2. **Màn hình Input Form:** Form nhập liệu với các field (Text, Date, Currency...). Form sẽ khác nhau cho từng loại biểu mẫu.
+3. **Màn hình Loading:** Hiển thị Skeleton/Animation kèm thông điệp "AI đang soạn thảo tài liệu...".
+4. **Màn hình Kết quả (Editor):** Text editor hiển thị nội dung AI trả về. Gồm thanh Toolbar phía dưới: `Copy Text`, `Tải PDF`, `Tải Word`, `Chia sẻ`.
+
+## 5. Tiêu chí chấp nhận (Acceptance Criteria)
+| Chức năng | Tiêu chí đánh giá |
+|---|---|
+| **Danh mục Mẫu** | Phải hiển thị đủ tối thiểu 5 mẫu chính tuyến ở Giai đoạn đầu. Có icon/mô tả rõ ràng. |
+| **Phản hồi AI** | Tốc độ AI sinh văn bản tối đa < 5-7 giây. File định dạng đúng (heading, bullet point, table) không bị vỡ lỗi markdown. |
+| **Trải nghiệm gõ form** | Form nhập liệu phải có validate cơ bản (Ví dụ: Số tiền không chứa chữ, ngày tháng hợp lệ, có thể tự tính chữ từ số tiền). |
+| **Tải xuống/Trích xuất** | Xuất PDF không bị lỗi font Tiếng Việt (UTF-8). Document giữ nguyên định dạng của màn Edit. |
+
+## 6. Phạm vi ngoài Giai đoạn 1 (Out of Scope for Phase 1)
+_Các tính năng sau sẽ chuyển lên roadmap của Giai đoạn 2:_
+* AI kiểm tra, highlight cảnh báo lỗi logic trong hợp đồng (ngày quá khứ, điều khoản bất lợi).
+* Hệ thống quản lý/lưu trữ các hợp đồng đã tạo trên cloud tài khoản Meey.
+* Tạo hợp đồng tự động kéo thông tin trực tiếp từ 1 URL tin đăng.
+* Smart contract/E-signature (Ký điện tử).
