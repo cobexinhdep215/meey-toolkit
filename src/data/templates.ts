@@ -1,4 +1,12 @@
-export const formConfigs: Record<string, any> = {
+export interface FormField {
+  name: string;
+  label: string;
+  placeholder?: string;
+  mockData: string;
+  isMoney?: boolean;
+}
+
+export const formConfigs: Record<string, FormField[]> = {
   "Hợp đồng Cho Thuê": [
     {
       "name": "chuDauTu",

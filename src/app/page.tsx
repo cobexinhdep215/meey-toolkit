@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState, useEffect, useRef } from "react";
-import { templateContent, formConfigs } from "../data/templates";
+import { templateContent, formConfigs, FormField } from "../data/templates";
 import { mockCustomers, mockRealEstates, Customer, RealEstate, Installment } from "../data/mock";
 
 const templates = [
@@ -45,7 +45,7 @@ export default function Home() {
     // Autofill with configured data if missing in initialData
     const config = formConfigs[title] || [];
     const newData: Record<string, string> = { ...initialData };
-    config.forEach(c => {
+    config.forEach((c: FormField) => {
       if (!newData[c.name]) {
         newData[c.name] = c.isMoney ? new Intl.NumberFormat('vi-VN').format(parseInt(c.mockData.replace(/\D/g, '') || '0', 10)) : c.mockData;
       }
