@@ -2,7 +2,17 @@
 
 import React, { useState, useEffect, useRef } from "react";
 import { templateContent, formConfigs, FormField } from "../data/templates";
-import { mockCustomers, mockRealEstates, Customer, RealEstate, Installment } from "../data/mock";
+import { 
+  mockCustomers, 
+  mockRealEstates, 
+  mockInvestors, 
+  mockProjects, 
+  mockTowers, 
+  mockFloors, 
+  Customer, 
+  Apartment as RealEstate, 
+  Installment 
+} from "../data/mock";
 
 const templates = [
   { id: 1, title: "Hợp đồng Cho Thuê", desc: "Mẫu hợp đồng thuê nhà chuẩn pháp lý.", icon: "ph-house-line", tag: "Giao dịch" },
@@ -26,6 +36,12 @@ export default function Home() {
   // States for new Customer -> Real Estate workflow
   const [selectedCustomer, setSelectedCustomer] = useState<Customer | null>(null);
   const [selectedRealEstate, setSelectedRealEstate] = useState<RealEstate | null>(null);
+
+  // Hierarchical selection states
+  const [selInvId, setSelInvId] = useState<string | null>(null);
+  const [selProjId, setSelProjId] = useState<string | null>(null);
+  const [selTowerId, setSelTowerId] = useState<string | null>(null);
+  const [selFloorId, setSelFloorId] = useState<string | null>(null);
 
   const [progress, setProgress] = useState(0);
   const [loadingText, setLoadingText] = useState("Đang thu thập dữ kiện...");
@@ -253,80 +269,210 @@ export default function Home() {
           </div>
         ) : activeTab === "customers" ? (
           <div className="px-10 pb-10 mt-6 animate-fadeIn">
-            <h2 className="text-3xl font-bold text-[#0b1437] mb-6 border-b pb-4">Quản lý Giao dịch</h2>
+            <h2 className="text-3xl font-bold text-[#0b1437] mb-6 border-b pb-4">Giao dịch Bất động sản</h2>
             
-            <div className="flex gap-8 h-[calc(100vh-200px)]">
-              {/* Real Estate List (Now on the left) */}
-              <div className="w-1/3 bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden flex flex-col">
-                <div className="p-4 border-b border-gray-100 bg-gray-50 font-bold text-[#2b3674]">Danh sách BĐS Đang Bán ({mockRealEstates.length})</div>
-                <div className="overflow-y-auto flex-1 custom-scrollbar">
-                  {mockRealEstates.map(re => (
-                    <div 
-                      key={re.id} 
-                      onClick={() => { setSelectedRealEstate(re); setSelectedCustomer(null); }}
-                      className={`p-4 border-b border-gray-50 cursor-pointer transition-colors ${selectedRealEstate?.id === re.id ? 'bg-[#f4f7fe] border-l-4 border-l-[#4318ff]' : 'hover:bg-gray-50 border-l-4 border-l-transparent'}`}
+            <div className="bg-white rounded-2xl shadow-xl border border-gray-100 flex flex-col h-[calc(100vh-220px)] overflow-hidden">
+              {/* Breadcrumb Navigation */}
+              <div className="bg-gray-50 border-b border-gray-100 px-6 py-4 flex items-center gap-2 overflow-x-auto whitespace-nowrap custom-scrollbar">
+                <button 
+                  onClick={() => { setSelInvId(null); setSelProjId(null); setSelTowerId(null); setSelFloorId(null); setSelectedRealEstate(null); setSelectedCustomer(null); }}
+                  className={`flex items-center gap-2 text-sm font-semibold transition-colors ${!selInvId ? 'text-[#4318ff]' : 'text-gray-400 hover:text-gray-600'}`}
+                >
+                  <i className="ph ph-buildings"></i> Chủ đầu tư
+                </button>
+                
+                {selInvId && (
+                  <>
+                    <i className="ph ph-caret-right text-gray-300 text-xs"></i>
+                    <button 
+                      onClick={() => { setSelProjId(null); setSelTowerId(null); setSelFloorId(null); setSelectedRealEstate(null); setSelectedCustomer(null); }}
+                      className={`flex items-center gap-2 text-sm font-semibold transition-colors ${selInvId && !selProjId ? 'text-[#4318ff]' : 'text-gray-400 hover:text-gray-600'}`}
                     >
-                      <div className="font-semibold text-[#0b1437]">{re.name}</div>
-                      <div className="text-sm text-gray-500 mt-1"><i className="ph ph-map-pin mr-1"></i>{re.address}</div>
-                      <div className="text-xs text-red-500 font-bold mt-1">{new Intl.NumberFormat('vi-VN').format(re.price)} ₫ - Diện tích: {re.area} m2</div>
-                      <div className="text-xs text-gray-400 mt-1"><i className="ph ph-buildings mr-1"></i>CĐT: {re.investor}</div>
-                    </div>
-                  ))}
-                </div>
+                      {mockInvestors.find(i => i.id === selInvId)?.name}
+                    </button>
+                  </>
+                )}
+
+                {selProjId && (
+                  <>
+                    <i className="ph ph-caret-right text-gray-300 text-xs"></i>
+                    <button 
+                      onClick={() => { setSelTowerId(null); setSelFloorId(null); setSelectedRealEstate(null); setSelectedCustomer(null); }}
+                      className={`flex items-center gap-2 text-sm font-semibold transition-colors ${selProjId && !selTowerId ? 'text-[#4318ff]' : 'text-gray-400 hover:text-gray-600'}`}
+                    >
+                      {mockProjects.find(p => p.id === selProjId)?.name}
+                    </button>
+                  </>
+                )}
+
+                {selTowerId && (
+                  <>
+                    <i className="ph ph-caret-right text-gray-300 text-xs"></i>
+                    <button 
+                      onClick={() => { setSelFloorId(null); setSelectedRealEstate(null); setSelectedCustomer(null); }}
+                      className={`flex items-center gap-2 text-sm font-semibold transition-colors ${selTowerId && !selFloorId ? 'text-[#4318ff]' : 'text-gray-400 hover:text-gray-600'}`}
+                    >
+                      {mockTowers.find(t => t.id === selTowerId)?.name}
+                    </button>
+                  </>
+                )}
+
+                {selFloorId && (
+                  <>
+                    <i className="ph ph-caret-right text-gray-300 text-xs"></i>
+                    <button 
+                      onClick={() => { setSelectedRealEstate(null); setSelectedCustomer(null); }}
+                      className={`flex items-center gap-2 text-sm font-semibold transition-colors ${selFloorId && !selectedRealEstate ? 'text-[#4318ff]' : 'text-gray-400 hover:text-gray-600'}`}
+                    >
+                      {mockFloors.find(f => f.id === selFloorId)?.name}
+                    </button>
+                  </>
+                )}
+
+                {selectedRealEstate && (
+                  <>
+                    <i className="ph ph-caret-right text-gray-300 text-xs"></i>
+                    <button 
+                      onClick={() => { setSelectedCustomer(null); }}
+                      className={`flex items-center gap-2 text-sm font-semibold transition-colors ${selectedRealEstate && !selectedCustomer ? 'text-[#4318ff]' : 'text-gray-400 hover:text-gray-600'}`}
+                    >
+                      Căn {selectedRealEstate.code}
+                    </button>
+                  </>
+                )}
               </div>
 
-              {/* Customer List -> Action (Now on the right) */}
-              <div className="w-2/3 bg-white rounded-2xl shadow-sm border border-gray-100 flex flex-col overflow-hidden">
-                {!selectedRealEstate ? (
-                  <div className="flex-1 flex flex-col items-center justify-center text-gray-400 p-10">
-                    <i className="ph ph-pointer text-6xl mb-4"></i>
-                    <p>Vui lòng chọn Bất động sản từ danh sách bên trái để giao dịch</p>
-                  </div>
-                ) : !selectedCustomer ? (
-                  <>
-                    <div className="p-4 border-b border-gray-100 bg-gray-50 flex justify-between items-center">
-                      <span className="font-bold text-[#2b3674]">Chọn Khách hàng Mua BĐS: <span className="text-[#4318ff]">{selectedRealEstate.name}</span></span>
-                    </div>
-                    <div className="overflow-y-auto flex-1 p-6 grid grid-cols-2 gap-4 custom-scrollbar">
-                      {mockCustomers.map(c => (
-                        <div key={c.id} className="border border-gray-200 rounded-xl p-4 flex flex-col justify-center items-start hover:shadow-md transition-shadow cursor-pointer bg-white" onClick={() => setSelectedCustomer(c)}>
-                          <div className="font-bold text-[#0b1437] text-lg mb-1">{c.name}</div>
-                          <div className="text-sm text-gray-500"><i className="ph ph-phone mr-1"></i>{c.phone}</div>
-                          <div className="text-sm text-gray-500"><i className="ph ph-envelope-simple mr-1"></i>{c.email}</div>
-                          <button className="mt-4 px-4 py-1.5 w-full bg-[#4318ff] text-white text-sm font-semibold rounded-lg hover:bg-[#3311db] transition-colors">Tạo Liên Kết</button>
+              {/* Selection Content */}
+              <div className="flex-1 overflow-y-auto p-8 custom-scrollbar bg-[#fdfdff]">
+                {!selInvId ? (
+                  /* Step 0: Select Investor */
+                  <div className="animate-fadeIn">
+                    <h3 className="text-xl font-bold text-[#0b1437] mb-6">Chọn Chủ đầu tư</h3>
+                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                      {mockInvestors.map(inv => (
+                        <div key={inv.id} onClick={() => setSelInvId(inv.id)} className="p-8 bg-white border border-gray-100 rounded-2xl shadow-sm hover:shadow-md hover:border-[#4318ff] transition-all cursor-pointer flex flex-col items-center text-center group">
+                          <div className="w-16 h-16 rounded-2xl bg-blue-50 text-[#4318ff] flex items-center justify-center text-3xl mb-4 group-hover:scale-110 transition-transform">
+                            <i className="ph ph-buildings"></i>
+                          </div>
+                          <h4 className="font-bold text-lg text-[#2b3674]">{inv.name}</h4>
+                          <p className="text-sm text-gray-400 mt-2">{mockProjects.filter(p => p.investorId === inv.id).length} Dự án đang bán</p>
                         </div>
                       ))}
                     </div>
-                  </>
+                  </div>
+                ) : !selProjId ? (
+                  /* Step 1: Select Project */
+                  <div className="animate-fadeIn">
+                    <h3 className="text-xl font-bold text-[#0b1437] mb-6">Chọn Dự án của {mockInvestors.find(i => i.id === selInvId)?.name}</h3>
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                      {mockProjects.filter(p => p.investorId === selInvId).map(proj => (
+                        <div key={proj.id} onClick={() => setSelProjId(proj.id)} className="p-6 bg-white border border-gray-100 rounded-2xl shadow-sm hover:shadow-md hover:border-[#4318ff] transition-all cursor-pointer group">
+                          <div className="flex gap-4 items-center">
+                            <div className="w-14 h-14 rounded-xl bg-orange-50 text-orange-500 flex items-center justify-center text-2xl group-hover:rotate-6 transition-transform">
+                              <i className="ph ph-layout"></i>
+                            </div>
+                            <div>
+                              <h4 className="font-bold text-[#2b3674]">{proj.name}</h4>
+                              <p className="text-xs text-gray-400 mt-1"><i className="ph ph-map-pin mr-1"></i>{proj.address}</p>
+                            </div>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                ) : !selTowerId ? (
+                  /* Step 2: Select Tower */
+                  <div className="animate-fadeIn">
+                    <h3 className="text-xl font-bold text-[#0b1437] mb-6">Chọn Tòa thuộc {mockProjects.find(p => p.id === selProjId)?.name}</h3>
+                    <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
+                      {mockTowers.filter(t => t.projectId === selProjId).map(tower => (
+                        <div key={tower.id} onClick={() => setSelTowerId(tower.id)} className="p-6 bg-white border border-gray-100 rounded-2xl shadow-sm hover:shadow-md hover:border-[#4318ff] transition-all cursor-pointer text-center group">
+                          <i className="ph ph-building text-3xl text-gray-300 group-hover:text-[#4318ff] mb-3 transition-colors"></i>
+                          <h4 className="font-bold text-[#2b3674]">{tower.name}</h4>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                ) : !selFloorId ? (
+                  /* Step 3: Select Floor */
+                  <div className="animate-fadeIn">
+                    <h3 className="text-xl font-bold text-[#0b1437] mb-6">Chọn Tầng (Tòa {mockTowers.find(t => t.id === selTowerId)?.name})</h3>
+                    <div className="grid grid-cols-3 md:grid-cols-6 lg:grid-cols-8 gap-4">
+                      {mockFloors.filter(f => f.towerId === selTowerId).map(floor => (
+                        <div key={floor.id} onClick={() => setSelFloorId(floor.id)} className="py-4 bg-white border border-gray-100 rounded-xl shadow-sm hover:bg-[#4318ff] hover:text-white transition-all cursor-pointer text-center font-bold text-[#2b3674]">
+                          {floor.name}
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                ) : !selectedRealEstate ? (
+                  /* Step 4: Select Unit */
+                  <div className="animate-fadeIn">
+                    <h3 className="text-xl font-bold text-[#0b1437] mb-6">Chọn Căn hộ (Tầng {mockFloors.find(f => f.id === selFloorId)?.name})</h3>
+                    <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-4">
+                      {mockRealEstates.filter(re => re.floorId === selFloorId).map(re => (
+                        <div key={re.id} onClick={() => setSelectedRealEstate(re)} className="p-4 bg-white border border-gray-100 rounded-xl shadow-sm hover:shadow-lg hover:border-[#4318ff] transition-all cursor-pointer relative group">
+                          <div className="font-extrabold text-[#2b3674] text-lg mb-1">{re.code}</div>
+                          <div className="text-[10px] text-gray-400 font-semibold">{re.area} m2 - {new Intl.NumberFormat('vi-VN').format(re.price / 1000000000)} tỷ</div>
+                          <div className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity">
+                            <i className="ph ph-check-circle text-[#05cd99]"></i>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                ) : !selectedCustomer ? (
+                  /* Step 5: Select Customer */
+                  <div className="animate-fadeIn">
+                    <div className="flex justify-between items-center mb-6">
+                      <h3 className="text-xl font-bold text-[#0b1437]">Chọn Khách hàng cho Căn {selectedRealEstate.code}</h3>
+                      <div className="text-xs font-bold text-red-500 bg-red-50 px-3 py-1 rounded-full">
+                        {mockProjects.find(p => p.id === selProjId)?.name} / {mockTowers.find(t => t.id === selTowerId)?.name}
+                      </div>
+                    </div>
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                      {mockCustomers.map(c => (
+                        <div key={c.id} onClick={() => setSelectedCustomer(c)} className="border border-gray-100 rounded-2xl p-5 flex flex-col justify-center items-start hover:shadow-xl hover:border-[#4318ff] transition-all cursor-pointer bg-white group shadow-sm">
+                          <div className="flex justify-between w-full items-center mb-2">
+                            <div className="font-bold text-[#0b1437] text-xl">{c.name}</div>
+                            <div className="w-10 h-10 rounded-full bg-gray-50 text-gray-300 flex items-center justify-center group-hover:bg-[#4318ff] group-hover:text-white transition-colors">
+                              <i className="ph ph-user-plus text-lg"></i>
+                            </div>
+                          </div>
+                          <div className="text-sm text-gray-500 flex items-center gap-2"><i className="ph ph-phone text-[#4318ff]"></i>{c.phone}</div>
+                          <div className="text-sm text-gray-400 flex items-center gap-2 mt-1"><i className="ph ph-envelope text-gray-300"></i>{c.email}</div>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
                 ) : (
-                  <div className="flex-1 p-8 flex flex-col relative overflow-y-auto custom-scrollbar">
-                    <button onClick={() => setSelectedCustomer(null)} className="absolute top-6 right-6 px-4 py-2 text-sm bg-gray-100 text-gray-600 rounded-lg hover:bg-gray-200"><i className="ph ph-arrow-left"></i> Chọn khách khác</button>
-                    
-                    <h3 className="text-2xl font-bold text-[#0b1437] mb-2">Xác nhận Giao dịch</h3>
-                    <p className="text-gray-500 mb-8">Hãy chọn loại biểu mẫu bạn muốn tạo cho khách hàng này.</p>
-                    
-                    <div className="bg-[#f4f7fe] p-6 rounded-xl border border-blue-100 mb-8 flex flex-col gap-4">
-                      <div className="flex justify-between items-center border-b border-blue-200 pb-4">
+                  /* Step 6: Confirmation action list */
+                  <div className="animate-fadeIn h-full flex flex-col">
+                    <div className="bg-blue-50 p-6 rounded-2xl border border-blue-100 mb-8 flex flex-col gap-4 shadow-inner">
+                      <div className="flex justify-between items-center border-b border-blue-100 pb-4">
                         <div>
-                          <p className="text-sm text-gray-500">Sản phẩm</p>
-                          <p className="font-bold text-lg text-[#2b3674]">{selectedRealEstate.name}</p>
-                          <p className="font-bold text-red-500">{new Intl.NumberFormat('vi-VN').format(selectedRealEstate.price)} đ (DT: {selectedRealEstate.area} m2)</p>
-                          <p className="text-sm text-gray-500 mt-1">CĐT: {selectedRealEstate.investor}</p>
+                          <p className="text-[10px] uppercase font-bold text-[#4318ff] tracking-wider mb-1">Dữ liệu Bất động sản</p>
+                          <p className="font-black text-2xl text-[#0b1437] leading-tight">{selectedRealEstate.name}</p>
+                          <p className="text-sm text-[#707eae] mt-1 font-medium italic">{mockInvestors.find(i => i.id === selInvId)?.name} • {mockProjects.find(p => p.id === selProjId)?.name} • {mockTowers.find(t => t.id === selTowerId)?.name}</p>
+                          <p className="font-bold text-red-500 mt-2 text-lg">{new Intl.NumberFormat('vi-VN').format(selectedRealEstate.price)} ₫ <span className="text-xs text-gray-400 font-normal ml-2">(Diện tích: {selectedRealEstate.area} m2)</span></p>
                         </div>
                         <div className="text-right">
-                          <p className="text-sm text-gray-500">Khách mua</p>
-                          <p className="font-bold text-lg text-[#2b3674]">{selectedCustomer.name}</p>
-                          <p className="text-sm text-gray-500">{selectedCustomer.phone}</p>
+                          <p className="text-[10px] uppercase font-bold text-orange-500 tracking-wider mb-1">Thông tin Khách hàng</p>
+                          <p className="font-black text-2xl text-[#0b1437] leading-tight">{selectedCustomer.name}</p>
+                          <p className="text-sm text-gray-500 mt-1 font-medium">{selectedCustomer.phone}</p>
                         </div>
                       </div>
                       
                       <div>
-                        <p className="text-sm font-semibold text-[#0b1437] mb-2">Tiến độ thanh toán dự kiến:</p>
-                        <div className="grid grid-cols-5 gap-2 text-center text-xs">
+                        <p className="text-xs font-bold text-[#2b3674] mb-3 flex items-center gap-2">
+                          <i className="ph ph-calendar-check text-[#4318ff]"></i> Tiến độ thanh toán áp dụng:
+                        </p>
+                        <div className="grid grid-cols-5 gap-3">
                           {selectedRealEstate.installments.map(i => (
-                            <div key={i.id} className="bg-white p-2 rounded border border-gray-200">
-                              <div className="font-bold text-[#4318ff]">{i.name} ({i.percent}%)</div>
-                              <div className="text-gray-600 mt-1">{new Intl.NumberFormat('vi-VN').format(i.amount)} ₫</div>
+                            <div key={i.id} className="bg-white p-3 rounded-xl border border-blue-100 shadow-sm">
+                              <div className="font-bold text-[#4318ff] text-[10px]">{i.name}</div>
+                              <div className="text-[#2b3674] font-black text-xs mt-1">{i.percent}%</div>
+                              <div className="text-[9px] text-gray-400 mt-1">{new Intl.NumberFormat('vi-VN').format(i.amount)} ₫</div>
                             </div>
                           ))}
                         </div>
@@ -340,17 +486,20 @@ export default function Home() {
                         { title: "Phụ lục 2 - Tiến độ thanh toán", icon: "ph-list-numbers", color: "#8b5cf6", bg: "hover:bg-purple-50", desc: "Bảng phân bổ chi tiết 5 đợt thanh toán." },
                         { title: "Biểu mẫu thanh toán theo đợt", icon: "ph-receipt", color: "#ff6b00", bg: "hover:bg-[#fff5f0]", desc: "Phiếu đề nghị thanh toán cho đợt cụ thể." }
                       ].map((btn, idx) => (
-                        <div key={idx} className={`border-2 border-dashed p-5 rounded-xl text-center cursor-pointer transition-colors ${btn.bg}`} style={{ borderColor: btn.color }}
+                        <div key={idx} className={`border border-gray-200 bg-white p-5 rounded-2xl flex items-center gap-5 cursor-pointer transition-all hover:shadow-xl hover:-translate-y-1 hover:border-transparent relative overflow-hidden group`}
                           onClick={() => {
+                            const project = mockProjects.find(p => p.id === selectedRealEstate.projectId);
+                            const tower = mockTowers.find(t => t.id === selectedRealEstate.towerId);
+                            
                             const initialData = {
                               tenKhachHang: selectedCustomer.name,
                               sdt: selectedCustomer.phone,
-                              chuDauTu: selectedRealEstate.investor,
-                              tenBDS: selectedRealEstate.name,
+                              chuDauTu: mockInvestors.find(i => i.id === selectedRealEstate.investorId)?.name || "",
+                              tenBDS: `${selectedRealEstate.name} - ${project?.name || ""}`,
                               dienTich: selectedRealEstate.area.toString(),
-                              diaChi: selectedRealEstate.address,
+                              diaChi: project?.address || "",
                               giaBan: new Intl.NumberFormat('vi-VN').format(selectedRealEstate.price),
-                              tienCoc: new Intl.NumberFormat('vi-VN').format(50000000), // Default 50tr
+                              tienCoc: new Intl.NumberFormat('vi-VN').format(50000000), 
                               tenDot: 'Đợt 1',
                               soTien: new Intl.NumberFormat('vi-VN').format(selectedRealEstate.installments[0].amount),
                               dot1: new Intl.NumberFormat('vi-VN').format(selectedRealEstate.installments[0].amount),
@@ -362,9 +511,16 @@ export default function Home() {
                             openModal(btn.title, initialData);
                           }}
                         >
-                          <i className={`ph ${btn.icon} text-3xl mb-2`} style={{ color: btn.color }}></i>
-                          <h4 className="font-bold text-[#0b1437] mb-1">{btn.title}</h4>
-                          <p className="text-xs text-gray-500">{btn.desc}</p>
+                          <div className="w-12 h-12 rounded-xl flex items-center justify-center text-3xl group-hover:scale-110 transition-transform" style={{ color: btn.color, backgroundColor: `${btn.color}15` }}>
+                            <i className={`ph ${btn.icon}`}></i>
+                          </div>
+                          <div className="flex-1">
+                            <h4 className="font-bold text-[#0b1437] transition-colors group-hover:text-[#4318ff]">{btn.title}</h4>
+                            <p className="text-[10px] text-gray-400 mt-1">{btn.desc}</p>
+                          </div>
+                          <div className="w-8 h-8 rounded-full flex items-center justify-center text-gray-200 group-hover:text-[#4318ff] transition-colors">
+                            <i className="ph ph-arrow-right font-bold"></i>
+                          </div>
                         </div>
                       ))}
                     </div>
@@ -372,6 +528,34 @@ export default function Home() {
                 )}
               </div>
             </div>
+          </div>
+        ) : activeTab === "my-templates" ? (
+          <div className="px-10 pb-10 mt-6 animate-fadeIn">
+            <h2 className="text-3xl font-bold text-[#0b1437] mb-6 border-b pb-4">Thư viện Mẫu của tôi</h2>
+
+            {savedTemplates.length === 0 ? (
+              <div className="text-center p-20 border-2 border-dashed border-gray-200 rounded-2xl bg-white mt-10">
+                <i className="ph ph-file-dashed text-6xl text-gray-300 mb-4"></i>
+                <p className="text-gray-500 mb-6">Bạn chưa lưu biểu mẫu nào. Hãy tìm mẫu phù hợp ở Tổng quan nhé!</p>
+                <button onClick={() => setActiveTab("overview")} className="px-8 py-3 bg-[#4318ff] hover:bg-[#3311db] transition-colors text-white rounded-lg font-semibold shadow-md">Tạo ngay biểu mẫu đầu tiên</button>
+              </div>
+            ) : (
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                {savedTemplates.map(st => (
+                  <div key={st.id} className="p-6 bg-white rounded-2xl shadow-sm border border-gray-100 relative group hover:shadow-md transition-shadow">
+                    <div className="flex justify-between items-start mb-2">
+                      <h3 className="font-bold text-[#2b3674] pr-4">{st.title}</h3>
+                      <i className="ph ph-files text-xl text-gray-300"></i>
+                    </div>
+                    <p className="text-xs text-gray-400 mb-5">Đã lưu: {st.date}</p>
+                    <div className="flex gap-3">
+                      <button onClick={() => openDetail(st)} className="px-4 py-2 text-sm font-semibold bg-[#f4f7fe] text-[#4318ff] rounded-lg hover:bg-blue-100 transition-colors">Xem / In</button>
+                      <button onClick={() => handleDelete(st.id)} className="px-4 py-2 text-sm font-semibold bg-red-50 text-red-500 rounded-lg hover:bg-red-100 transition-colors">Xóa</button>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
           </div>
         ) : null}
       </main>
